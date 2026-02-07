@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Ali Plastic Store</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --primary: #2563eb; --primary-hover: #1d4ed8; --bg: #f8fafc; --text: #1e293b; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        
+        .auth-card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 400px; border: 1px solid #e2e8f0; }
+        .logo-area { text-align: center; margin-bottom: 30px; }
+        .logo-area i { font-size: 3rem; color: var(--primary); margin-bottom: 10px; }
+        h2 { margin: 0; color: var(--text); font-size: 1.5rem; font-weight: 800; }
+        p { color: #64748b; margin-top: 5px; font-size: 0.9rem; }
+
+        /* Error Alert */
+        .error-alert { background: #fef2f2; color: #dc2626; padding: 12px; border-radius: 8px; border: 1px solid #fecaca; margin-bottom: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 10px; animation: shake 0.3s ease-in-out; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #475569; font-size: 0.9rem; }
+        .input-wrapper { position: relative; }
+        .input-wrapper i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+        input { width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; box-sizing: border-box; transition: 0.2s; outline: none; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+
+        .btn-auth { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+        .btn-auth:hover { background: var(--primary-hover); }
+
+        .footer-link { text-align: center; margin-top: 25px; font-size: 0.9rem; color: #64748b; }
+        .footer-link a { color: var(--primary); text-decoration: none; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+<div class="auth-card">
+    <div class="logo-area">
+        <i class="fas fa-user-shield"></i>
+        <h2>Store Login</h2>
+        <p>Enter your credentials to manage inventory</p>
+    </div>
+
+    <% if (error && error.length > 0) { %>
+        <div class="error-alert">
+            <i class="fas fa-exclamation-circle"></i>
+            <%= error %>
+        </div>
+    <% } %>
+
+    <form action="/login" method="POST">
+        <div class="form-group">
+            <label>Username</label>
+            <div class="input-wrapper">
+                <i class="fas fa-user"></i>
+                <input type="text" name="username" required placeholder="admin_ali">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <div class="input-wrapper">
+                <i class="fas fa-key"></i>
+                <input type="password" name="password" required placeholder="••••••••">
+            </div>
+        </div>
+        <button type="submit" class="btn-auth">Sign In</button>
+    </form>
+
+    <div class="footer-link">
+        New staff member? <a href="/signup">Create Account</a>
+    </div>
+</div>
+
+</body>
+</html>

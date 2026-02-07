@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management | Ali Plastic Store</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --primary: #1e293b; --accent: #2563eb; --success: #059669; --danger: #dc2626; --bg: #f8fafc; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .back-btn { text-decoration: none; color: var(--accent); font-weight: 600; }
+
+        .user-list { display: grid; gap: 15px; }
+        .user-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; border: 1px solid #e2e8f0; }
+        
+        .user-info h3 { margin: 0; color: var(--primary); font-size: 1.1rem; }
+        .user-info p { margin: 5px 0 0; color: #64748b; font-size: 0.85rem; }
+
+        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
+        .status-authorized { background: #dcfce7; color: var(--success); }
+        .status-pending { background: #fef3c7; color: #d97706; }
+
+        .action-btn { border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; font-size: 0.85rem; }
+        .btn-grant { background: var(--success); color: white; }
+        .btn-revoke { background: #fee2e2; color: var(--danger); }
+        .action-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        @media (max-width: 600px) {
+            .user-card { flex-direction: column; gap: 15px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+<%- include('partials/navbar') %>
+
+<div class="container">
+    <div class="header">
+       
+        <div style="text-align: right;">
+            <span style="color: #64748b; font-size: 0.9rem;">Total Users: <%= users.length %></span>
+        </div>
+    </div>
+
+    <div class="user-list">
+        <% users.forEach(user => { %>
+            <div class="user-card">
+                <div class="user-info">
+                    <h3><i class="fas fa-user-circle"></i> <%= user.username %></h3>
+                    <p>ID: <%= user._id %></p>
+                    <div style="margin-top: 8px;">
+                        <% if(user.isAuthorized) { %>
+                            <span class="status-badge status-authorized">Authorized</span>
+                        <% } else { %>
+                            <span class="status-badge status-pending">Access Pending</span>
+                        <% } %>
+                    </div>
+                </div>
+
+                <form action="/admin/authorize/<%= user._id %>" method="POST">
+                    <% if(user.isAuthorized) { %>
+                        <button type="submit" class="action-btn btn-revoke">
+                            <i class="fas fa-user-slash"></i> Revoke Access
+                        </button>
+                    <% } else { %>
+                        <button type="submit" class="action-btn btn-grant">
+                            <i class="fas fa-user-check"></i> Grant Access
+                        </button>
+                    <% } %>
+                </form>
+            </div>
+        <% }) %>
+    </div>
+</div>
+
+</body>
+</html>

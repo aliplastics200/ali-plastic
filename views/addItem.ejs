@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ali Plastic Store | Inventory Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --secondary: #5f6368;
+            --success: #2e7d32;
+            --danger: #d93025;
+            --warning: #f9ab00;
+            --bg: #f8f9fa;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); color: #202124; }
+       
+        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+        .section { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 1px 2px rgba(60,64,67,0.3); margin-bottom: 24px; border: 1px solid #dadce0; }
+        
+        h2 { margin-top: 0; color: var(--primary); font-size: 1.25rem; font-weight: 500; margin-bottom: 20px; }
+        
+        label { font-weight: 600; display: block; margin-top: 15px; font-size: 0.85rem; color: #5f6368; }
+        input, select { 
+            width: 100%; padding: 12px; margin-top: 6px; border: 1px solid #dadce0; 
+            border-radius: 8px; box-sizing: border-box; font-size: 1rem; transition: 0.2s;
+        }
+        
+        .error-border { border-color: var(--danger) !important; background-color: #fff8f8; }
+        .error-text { color: var(--danger); font-size: 0.75rem; margin-top: 4px; display: block; font-weight: 500; min-height: 15px; }
+        
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        
+        .price-container { background: #fdfdfd; padding: 20px; border-radius: 10px; border: 1px dashed #dadce0; margin-top: 25px; }
+        .price-group-label { font-size: 0.9rem; font-weight: bold; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .summary-box { 
+            background: #e8f0fe; padding: 20px; border-radius: 8px; margin-top: 25px; 
+            border-left: 6px solid var(--primary); display: flex; justify-content: space-between; align-items: center;
+        }
+        .summary-val { font-weight: bold; font-size: 1.1rem; color: var(--primary); }
+
+        button.btn-save { 
+            width: 100%; padding: 16px; background: var(--primary); color: white; 
+            border: none; border-radius: 8px; font-weight: bold; cursor: pointer; 
+            margin-top: 30px; font-size: 1rem; transition: 0.2s;
+        }
+        button:disabled { background-color: #dadce0; cursor: not-allowed; color: #9aa0a6; }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<%- include('partials/navbar') %>
+
+
+<div class="container">
+    <div class="section">
+        <h2>Add New Product to Inventory</h2>
+        
+        <label>Product Name <span style="color:red">*</span></label>
+        <input type="text" id="prodName" placeholder="e.g. Stretch Roll" oninput="handleInput('prodName')" onblur="handleInput('prodName')">
+        <span id="prodNameError" class="error-text"></span>
+        
+        <div class="grid-3">
+            <div>
+                <label>Unit Size (Value) <span style="color:red">*</span></label>
+                <input type="number" id="unitVal" min="0.01" step="any" placeholder="12" oninput="handleInput('unitVal')" onblur="handleInput('unitVal')">
+                <span id="unitValError" class="error-text"></span>
+            </div>
+            <div>
+                <label>Unit Measurement</label>
+                <select id="unitType" onchange="handleInput('unitType')">
+                    <option>--</option><option>Number</option><option>Inches</option><option>Oz</option><option>ML</option><option>Grams</option>
+                    <option>Kg</option><option>Foot</option>
+                </select>
+            </div>
+            <div>
+                <label>Buying Format</label>
+                <select id="buyFormat" onchange="toggleFormatInputs()">
+                    <option value="Carton">Carton (Carton > Packet > Piece)</option>
+                    <option value="Packet">Packet (Packet > Piece)</option>
+                    <option value="Bag">Bag (Weight/Kg)</option>
+                    <option value="Single">Single Quantity</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="quantityGrid" class="grid-3">
+            <div id="mainQtyGroup">
+                <label id="mainQtyLabel">Number of Cartons</label>
+                <input type="number" id="mainQty" value="1" min="1" oninput="handleInput('mainQty')" onblur="handleInput('mainQty')">
+                <span id="mainQtyError" class="error-text"></span>
+            </div>
+            <div id="subQtyGroup1">
+                <label id="subQtyLabel1">Packets per Carton</label>
+                <input type="number" id="subQty1" value="1" min="1" oninput="handleInput('subQty1')" onblur="handleInput('subQty1')">
+                <span id="subQty1Error" class="error-text"></span>
+            </div>
+            <div id="subQtyGroup2">
+                <label id="subQtyLabel2">Pieces per Packet</label>
+                <input type="number" id="subQty2" value="1" min="1" oninput="handleInput('subQty2')" onblur="handleInput('subQty2')">
+                <span id="subQty2Error" class="error-text"></span>
+            </div>
+        </div>
+
+<div class="section" style="border: 1px solid var(--warning); background: #fffcf5;">
+    <h2 style="color: #856404;"><i class="fas fa-exclamation-triangle"></i> Reorder Alert</h2>
+    <div class="grid-3">
+        <div>
+            <label id="minLimitLabel">Alert me when Cartons left is less than:</label>
+            <input type="number" id="minLimit" value="5" min="0" oninput="handleInput('minLimit')">
+            <span id="minLimitError" class="error-text"></span>
+        </div>
+        <div style="grid-column: span 2; display: flex; align-items: center; color: var(--secondary); font-size: 0.85rem; padding-top: 25px;">
+            <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
+            This product will appear on the "Low Stock" page once inventory falls below this value.
+        </div>
+    </div>
+</div>
+
+
+        <div class="price-container">
+            <div class="price-group">
+                <p class="price-group-label"><i class="fas fa-arrow-down"></i> Buying Prices</p>
+                
+                <div class="grid-3">
+                    <div id="buyCartonGroup"><label>Price per Carton</label><input type="number" id="buyPriceCarton" min="0" step="any" oninput="distributePrice('buy', 'carton')"></div>
+                    <div id="buyPacketGroup"><label>Price per Packet</label><input type="number" id="buyPricePacket" min="0" step="any" oninput="distributePrice('buy', 'packet')"></div>
+                    <div><label id="buyUnitLabel">Price per Piece (Cost)</label><input type="number" id="buyPricePiece" min="0" step="any" oninput="distributePrice('buy', 'piece'); handleInput('buyPricePiece')"></div>
+                </div>
+            </div>
+
+            <div class="price-group" style="margin-top: 25px;">
+                <p class="price-group-label"><i class="fas fa-arrow-up"></i> Selling Prices</p>
+                <div class="grid-3">
+                    <div id="sellCartonGroup"><label>Sell per Carton</label><input type="number" id="sellPriceCarton" min="0" step="any" oninput="distributePrice('sell', 'carton')"></div>
+                    <div id="sellPacketGroup"><label>Sell per Packet</label><input type="number" id="sellPricePacket" min="0" step="any" oninput="distributePrice('sell', 'packet')"></div>
+                    <div>
+                        <label id="sellUnitLabel">Sell per Piece (Price)</label>
+                        <input type="number" id="sellPricePiece" min="0" step="any" oninput="distributePrice('sell', 'piece'); handleInput('sellPricePiece')" onblur="handleInput('sellPricePiece')">
+                        <span id="sellPricePieceError" class="error-text"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-box">
+            <div class="summary-item">
+                <i class="fas fa-calculator"></i> Total Stock: <span class="summary-val" id="totalStockDisplay">0</span><br>
+                <small id="mathBreakdown" style="color:#666;"></small>
+            </div>
+            <div class="summary-item" style="text-align: right;">
+                Profit per Unit: <br>
+                <span class="summary-val" id="profitDisplay" style="color: var(--success);">Rs 0.00</span>
+            </div>
+        </div>
+
+        <button class="btn-save" onclick="saveProduct()" id="saveBtn"><i class="fas fa-save"></i> Save Product to Inventory</button>
+    </div>
+</div>
+
+<script>
+    let currentFormat = 'Carton';
+    let touchedFields = new Set();
+
+    function handleInput(id) {
+        touchedFields.add(id);
+        calculate();
+        validateForm();
+    }
+
+function toggleFormatInputs() {
+    currentFormat = document.getElementById('buyFormat').value;
+    
+    // Group Elements
+    const g1 = document.getElementById('subQtyGroup1');
+    const g2 = document.getElementById('subQtyGroup2');
+    const bc = document.getElementById('buyCartonGroup');
+    const bp = document.getElementById('buyPacketGroup');
+    const sc = document.getElementById('sellCartonGroup');
+    const sp = document.getElementById('sellPacketGroup');
+    
+    // Labels & Text
+    const buyLabel = document.getElementById('buyUnitLabel');
+    const sellLabel = document.getElementById('sellUnitLabel');
+    const mainQtyLabel = document.getElementById('mainQtyLabel');
+    const minLimitLabel = document.getElementById('minLimitLabel');
+
+    // 1. Reset Defaults (Show everything, then hide specifically)
+    [g1, g2, bc, bp, sc, sp].forEach(el => el.classList.remove('hidden'));
+    buyLabel.innerText = "Price per Piece (Cost)";
+    sellLabel.innerText = "Sell per Piece (Price)";
+
+    // 2. Format Specific Logic
+    if (currentFormat === 'Carton') {
+        mainQtyLabel.innerText = "Number of Cartons";
+        document.getElementById('subQtyLabel1').innerText = "Packets per Carton";
+        document.getElementById('subQtyLabel2').innerText = "Pieces per Packet";
+        minLimitLabel.innerText = "Alert me when Cartons left is less than:";
+    } 
+    else if (currentFormat === 'Packet') {
+        mainQtyLabel.innerText = "Number of Packets";
+        document.getElementById('subQtyLabel1').innerText = "Pieces per Packet";
+        minLimitLabel.innerText = "Alert me when Packets left is less than:";
+        // Hide Carton-level inputs
+        [g2, bc, sc].forEach(el => el.classList.add('hidden'));
+    } 
+    else if (currentFormat === 'Bag') {
+        mainQtyLabel.innerText = "Number of Bags";
+        document.getElementById('subQtyLabel1').innerText = "Weight per Bag (Kg)";
+        buyLabel.innerText = "Price per Kg (Cost)";
+        sellLabel.innerText = "Sell per Kg (Price)";
+        minLimitLabel.innerText = "Alert me when Bags left is less than:";
+        
+        // Adjust labels for Bag mode
+        document.querySelector('#buyPacketGroup label').innerText = "Price per Bag";
+        document.querySelector('#sellPacketGroup label').innerText = "Sell per Bag";
+        
+        // Hide Carton-level and 3rd-tier quantity
+        [g2, bc, sc].forEach(el => el.classList.add('hidden'));
+    } 
+    else { // Single Quantity mode
+        mainQtyLabel.innerText = "Total Pieces";
+        minLimitLabel.innerText = "Alert me when Pieces left is less than:";
+        // Hide all conversion groups
+        [g1, g2, bc, bp, sc, sp].forEach(el => el.classList.add('hidden'));
+    }
+
+    // 3. Re-calculate totals based on the new view
+    calculate();
+}
+function calculate() {
+        const main = parseFloat(document.getElementById('mainQty').value) || 0;
+        const q1 = parseFloat(document.getElementById('subQty1').value) || 1;
+        const q2 = parseFloat(document.getElementById('subQty2').value) || 1;
+        
+        let total = 0;
+        let breakdown = "";
+
+        if (currentFormat === 'Carton') {
+            total = main * q1 * q2;
+            breakdown = `${main} Ctn x ${q1} Pkt x ${q2} Pcs`;
+        } else if (currentFormat === 'Packet') {
+            total = main * q1;
+            breakdown = `${main} Pkt x ${q1} Pcs`;
+        } else if (currentFormat === 'Bag') {
+            total = main * q1;
+            breakdown = `${main} Bag x ${q1} Kg`;
+        } else {
+            total = main;
+            breakdown = `${main} Single Items`;
+        }
+
+        document.getElementById('totalStockDisplay').innerText = total + (currentFormat === 'Bag' ? " Kg" : " Pieces");
+        document.getElementById('mathBreakdown').innerText = breakdown;
+        return total;
+    }
+
+function distributePrice(mode, level) {
+    const q1 = parseFloat(document.getElementById('subQty1').value) || 1;
+    const q2 = parseFloat(document.getElementById('subQty2').value) || 1;
+    const cIn = document.getElementById(`${mode}PriceCarton`);
+    const pIn = document.getElementById(`${mode}PricePacket`);
+    const uIn = document.getElementById(`${mode}PricePiece`);
+
+    if (currentFormat === 'Carton') {
+        if (level === 'carton') {
+            pIn.value = (cIn.value / q1).toFixed(2);
+            uIn.value = (cIn.value / (q1 * q2)).toFixed(2);
+        } else if (level === 'packet') {
+            cIn.value = (pIn.value * q1).toFixed(2);
+            uIn.value = (pIn.value / q2).toFixed(2);
+        } else if (level === 'piece') {
+            pIn.value = (uIn.value * q2).toFixed(2);
+            cIn.value = (uIn.value * q2 * q1).toFixed(2);
+        }
+    } 
+    else if (currentFormat === 'Packet' || currentFormat === 'Bag') {
+        // For Bag: level 'packet' = Price per Bag, level 'piece' = Price per Kg
+        if (level === 'packet') {
+            uIn.value = (pIn.value / q1).toFixed(2);
+        } else if (level === 'piece') {
+            pIn.value = (uIn.value * q1).toFixed(2);
+        }
+    }
+    
+    touchedFields.add(`${mode}PricePiece`);
+    updateProfit();
+}
+    function updateProfit() {
+        const buy = parseFloat(document.getElementById('buyPricePiece').value) || 0;
+        const sell = parseFloat(document.getElementById('sellPricePiece').value) || 0;
+        const profit = sell - buy;
+        const disp = document.getElementById('profitDisplay');
+        disp.innerText = "Rs " + profit.toFixed(2);
+        disp.style.color = profit >= 0 ? "var(--success)" : "var(--danger)";
+        validateForm();
+    }
+
+    function validateForm() {
+        let hasErrors = false;
+        const btn = document.getElementById('saveBtn');
+        
+        // Define all fields to check
+        const fields = ['prodName', 'unitVal', 'mainQty', 'sellPricePiece'];
+        if (['Carton', 'Packet', 'Bag'].includes(currentFormat)) fields.push('subQty1');
+        if (currentFormat === 'Carton') fields.push('subQty2');
+
+        const buyPrice = parseFloat(document.getElementById('buyPricePiece').value) || 0;
+        const sellPrice = parseFloat(document.getElementById('sellPricePiece').value) || 0;
+
+        fields.forEach(id => {
+            const input = document.getElementById(id);
+            const span = document.getElementById(id + 'Error');
+            const val = input.value.trim();
+            let msg = "";
+
+            // Check if empty
+            if (val === "") {
+                msg = "Field cannot be empty";
+                hasErrors = true;
+            } 
+            // Check if numeric fields are <= 0
+            else if (id !== 'prodName' && parseFloat(val) <= 0) {
+                msg = "Must be greater than 0";
+                hasErrors = true;
+            }
+
+            // Specific check for Selling Price (No Loss Allowed)
+            if (id === 'sellPricePiece') {
+                if (sellPrice > 0 && sellPrice < buyPrice) {
+                    msg = "Selling price cannot be less than cost!";
+                    hasErrors = true;
+                }
+            }
+
+            // Apply styles and error text only if touched
+            if (touchedFields.has(id)) {
+                if (msg) {
+                    input.classList.add('error-border');
+                    if (span) span.innerText = msg;
+                } else {
+                    input.classList.remove('error-border');
+                    if (span) span.innerText = '';
+                }
+            }
+        });
+
+        // Final Button state logic: disable if any field is empty/invalid OR if it's a loss
+        btn.disabled = hasErrors;
+    }
+
+async function saveProduct() {
+        // Mark everything as touched to reveal any missed errors
+        const fields = ['prodName', 'unitVal', 'mainQty', 'sellPricePiece'];
+        fields.forEach(f => touchedFields.add(f));
+        validateForm();
+
+        if (document.getElementById('saveBtn').disabled) return;
+
+        // Capture ratios based on the format
+        const q1 = parseFloat(document.getElementById('subQty1').value) || 1;
+        const q2 = parseFloat(document.getElementById('subQty2').value) || 1;
+
+        const payload = {
+            prodName: document.getElementById('prodName').value.trim(),
+            unitVal: document.getElementById('unitVal').value,
+            unitType: document.getElementById('unitType').value,
+            minLimit: document.getElementById('minLimit').value,
+            buyFormat: currentFormat,
+            
+            // New: Saving the specific breakdown ratios to DB
+            subQty1: q1, // Packets per Carton OR Pieces per Packet OR Weight per Bag
+            subQty2: currentFormat === 'Carton' ? q2 : 1, // Only used for Pieces per Packet in Carton mode
+            
+            totalItems: calculate(),
+            unitCost: document.getElementById('buyPricePiece').value,
+            sellPrice: document.getElementById('sellPricePiece').value,
+            minLimit: parseFloat(document.getElementById('minLimit').value) || 0, // ADD THIS LINE
+            profit: (document.getElementById('sellPricePiece').value - document.getElementById('buyPricePiece').value).toFixed(2)
+        };
+
+        try {
+            const res = await fetch('/inventory/add', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            
+            const data = await res.json();
+            
+            if (res.status === 409 || (data.message && data.message.includes('exists'))) {
+                document.getElementById('prodName').classList.add('error-border');
+                document.getElementById('prodNameError').innerText = "This product variation already exists!";
+                alert("❌ Duplicate entry found in database.");
+            } else if (res.ok) {
+                alert("✅ Product successfully saved with full format details!");
+                window.location.reload();
+            } else {
+                alert("❌ Error: " + (data.message || "Unknown error"));
+            }
+        } catch (err) {
+            alert("❌ Server Connection Error");
+        }
+    }
+    window.onload = toggleFormatInputs;
+</script>
+</body>
+</html>

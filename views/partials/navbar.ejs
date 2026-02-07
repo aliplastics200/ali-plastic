@@ -1,0 +1,189 @@
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="/inventory" class="nav-logo">
+            <div class="logo-icon"><i class="fas fa-box-open"></i></div>
+            <div class="logo-text">
+                <span class="brand-name">Ali Plastic</span>
+                <span class="brand-sub">Store</span>
+            </div>
+        </a>
+
+        <button class="nav-toggle" id="navToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <div class="nav-content" id="navMenu">
+            <ul class="nav-links">
+                <% if (user) { %>
+                    <% if (user.isAuthorized) { %>
+                        
+                        <li class="nav-group">
+                            <span class="group-label">Inventory</span>
+                            <div class="group-items">
+                                <a href="/inventory" class="nav-link"><i class="fas fa-home"></i> Dashboard</a>
+                                <a href="/inventory/add-page" class="nav-link"><i class="fas fa-plus-circle"></i> Add Item</a>
+                                <a href="/inventory/update-stock" class="nav-link"><i class="fas fa-boxes"></i> Restock</a>
+                                <a href="/inventory/restock-radar" class="nav-link"><i class="fas fa-satellite-dish"></i> CheckList</a>
+                            </div>
+                        </li>
+
+                        <li class="nav-group">
+                            <span class="group-label">Business</span>
+                            <div class="group-items">
+                                <a href="/inventory/billing" class="nav-link"><i class="fas fa-file-invoice-dollar"></i> Billing</a>
+                                <a href="/inventory/pnl" class="nav-link"><i class="fas fa-chart-line"></i> P&L Report</a>
+                            </div>
+                        </li>
+
+                        <% if (user.username === 'admin') { %>
+                        <li class="nav-group">
+                            <span class="group-label">System</span>
+                            <div class="group-items">
+                                <a href="/admin/users" class="nav-link admin-special"><i class="fas fa-users-cog"></i> Users</a>
+                            </div>
+                        </li>
+                        <% } %>
+
+                    <% } else { %>
+                        <li><span class="auth-pending"><i class="fas fa-user-clock"></i> Access Pending Authorization</span></li>
+                    <% } %>
+                <% } else { %>
+                    <li><a href="/login" class="nav-link"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                    <li><a href="/signup" class="nav-link btn-signup">Create Account</a></li>
+                <% } %>
+            </ul>
+
+            <% if (user) { %>
+            <div class="nav-user-profile">
+                <div class="user-avatar"><%= user.username.charAt(0).toUpperCase() %></div>
+                <div class="user-details">
+                    <span class="u-name"><%= user.username %></span>
+                    <a href="/logout" class="logout-btn">Sign Out <i class="fas fa-power-off"></i></a>
+                </div>
+            </div>
+            <% } %>
+        </div>
+    </div>
+</nav>
+
+<style>
+    :root {
+        --nav-bg: #1e293b; 
+        --accent: #3b82f6;
+        --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    .navbar {
+        background: var(--nav-bg);
+        color: white;
+        padding: 0.6rem 2rem;
+        position: sticky;
+        top: 0;
+        z-index: 2000;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    /* CENTERING LOGIC: This removes side space and groups everything in middle */
+    .nav-container {
+        display: flex;
+        justify-content: center; 
+        align-items: center;
+        gap: 50px;
+        width: 100%;
+    }
+
+    .nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        color: white;
+        border-right: 1px solid var(--glass-border);
+        padding-right: 25px;
+    }
+    .logo-icon {
+        background: var(--accent);
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        font-size: 1.1rem;
+    }
+    .brand-name { display: block; font-weight: 800; font-size: 1.1rem; line-height: 1; }
+    .brand-sub { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+
+    .nav-content { display: flex; align-items: center; gap: 40px; }
+    .nav-links { display: flex; list-style: none; gap: 35px; margin: 0; padding: 0; }
+    
+    .nav-group { display: flex; flex-direction: column; }
+    .group-label { font-size: 0.6rem; color: #64748b; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px;}
+    .group-items { display: flex; gap: 20px; }
+
+    .nav-link {
+        color: #cbd5e1;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: 0.2s;
+    }
+    .nav-link:hover { color: white; }
+    .admin-special { color: #fcd34d; }
+
+    .nav-user-profile {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding-left: 25px;
+        border-left: 1px solid var(--glass-border);
+    }
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        background: #334155;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        border: 2px solid var(--accent);
+        font-size: 0.8rem;
+    }
+    .user-details { display: flex; flex-direction: column; line-height: 1.2; }
+    .u-name { font-size: 0.8rem; font-weight: 700; color: #f8fafc; }
+    .logout-btn { font-size: 0.7rem; color: #f87171; text-decoration: none; font-weight: 600; }
+
+    .auth-pending { color: #f59e0b; font-size: 0.85rem; font-weight: 600; background: rgba(245, 158, 11, 0.1); padding: 5px 12px; border-radius: 4px; }
+    .btn-signup { background: var(--accent); padding: 6px 14px; border-radius: 6px; color: white !important; }
+
+    .nav-toggle { display: none; background: none; border: none; color: white; font-size: 1.3rem; cursor: pointer; }
+
+    /* Mobile Responsive */
+    @media (max-width: 1100px) {
+        .nav-container { justify-content: space-between; padding: 0 10px; gap: 0; }
+        .nav-logo { border: none; }
+        .nav-toggle { display: block; }
+        .nav-content {
+            display: none;
+            position: absolute;
+            top: 100%; left: 0; width: 100%;
+            background: var(--nav-bg);
+            flex-direction: column; padding: 20px;
+            border-bottom: 3px solid var(--accent);
+        }
+        .nav-content.show { display: flex; }
+        .nav-links { flex-direction: column; width: 100%; gap: 20px; }
+        .group-items { flex-direction: column; gap: 12px; }
+        .nav-user-profile { border-left: none; border-top: 1px solid var(--glass-border); padding: 15px 0 0 0; width: 100%; margin-top: 10px; }
+    }
+</style>
+
+<script>
+    document.getElementById('navToggle').addEventListener('click', function() {
+        document.getElementById('navMenu').classList.toggle('show');
+    });
+</script>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics | Ali Plastic Store</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { 
+            --primary: #1e293b; 
+            --accent: #2563eb; 
+            --success: #059669; 
+            --bg: #f8fafc; 
+            --border: #e2e8f0;
+        }
+
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 0px; color: #334155; }
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        /* Header & Nav */
+        .header { margin-bottom: 25px; }
+        .back-btn { text-decoration: none; color: var(--accent); font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        
+        .header-main { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; }
+        h1 { margin: 0; font-size: 1.75rem; color: var(--primary); }
+
+        /* Date Filter Bar */
+        .filter-bar { 
+            background: white; padding: 15px; border-radius: 12px; border: 1px solid var(--border); 
+            display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; margin-bottom: 25px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        /* Container for the individual sold item */
+.item-tag { 
+    display: inline-flex; 
+    align-items: center; 
+    background: #ffffff; 
+    padding: 4px 10px; 
+    border-radius: 6px; 
+    font-size: 0.85rem; 
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+
+/* Format Label (bulk/sub/unit) */
+.format-badge {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    font-weight: 800;
+    margin-left: 8px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+}
+
+/* Colors for Different Modes */
+.bg-bulk { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; } /* Reddish for Bulk/Carton */
+.bg-sub { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }  /* Yellowish for Packet/Sub */
+.bg-unit { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; } /* Greenish for Piece */
+
+@media print {
+    .format-badge { border: 1px solid #000 !important; color: #000 !important; }
+}
+        .filter-group { display: flex; flex-direction: column; gap: 5px; }
+        .filter-group label { font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; }
+        .filter-input { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); outline: none; font-family: inherit; }
+        .btn-search { background: var(--accent); color: white; border: none; padding: 9px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .btn-search:hover { background: #1d4ed8; }
+        .btn-print { background: white; border: 1px solid var(--border); padding: 9px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+
+        /* Stats Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 5px solid var(--accent); transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-3px); }
+        .stat-card.profit { border-left-color: var(--success); }
+        .stat-label { font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase; }
+        .stat-value { font-size: 1.5rem; font-weight: 800; margin-top: 5px; color: var(--primary); }
+
+        /* Table Design */
+        .table-container { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8fafc; padding: 15px; text-align: left; font-size: 0.8rem; color: #64748b; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; }
+
+        /* Date Separator Row */
+        .date-separator { background: #f1f5f9; padding: 8px 15px; font-weight: 800; font-size: 0.85rem; color: #475569; display: flex; align-items: center; gap: 10px; }
+        .date-separator::after { content: ""; flex: 1; height: 1px; background: #cbd5e1; }
+
+        .item-tag { display: inline-flex; align-items: center; background: #f0f9ff; color: #0369a1; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin: 2px; border: 1px solid #e0f2fe; }
+        .profit-text { color: var(--success); font-weight: 700; }
+        .time-text { color: #94a3b8; font-weight: 600; }
+        .one{
+            background-color: #0369a1;
+        }
+        .two{
+            background-color: #059669;
+        }
+        .three{
+            background-color: #fecaca;
+        }
+
+        /* Responsiveness */
+        @media (max-width: 768px) {
+            .filter-bar { flex-direction: column; align-items: stretch; }
+            .btn-search { width: 100%; }
+            th:nth-child(2), td:nth-child(2) { display: none; } /* Hide items list on tiny mobile */
+        }
+
+        @media print {
+            .nav-top, .filter-bar, .btn-print { display: none !important; }
+            body { padding: 0; background: white; }
+            .stat-card { box-shadow: none; border: 1px solid #eee; }
+        }
+    </style>
+</head>
+<body>
+<%- include('partials/navbar') %>
+
+<div class="container">
+    <div class="header">
+        <div class="nav-top" style="margin-top: 10px;">
+            <!-- <a href="/inventory/billing" class="back-btn"><i class="fas fa-arrow-left"></i> POS Dashboard</a> -->
+            
+        </div>
+        <div class="header-main">
+            <h1>Business Performance</h1>
+           
+        </div>
+    </div>
+
+    <form action="/inventory/pnl" method="GET" class="filter-bar">
+        <div class="filter-group">
+            <label>From Date</label>
+            <input type="date" name="startDate" class="filter-input" required>
+        </div>
+        <div class="filter-group">
+            <label>To Date</label>
+            <input type="date" name="endDate" class="filter-input" required>
+        </div>
+        <button type="submit" class="btn-search">
+            <i class="fas fa-search"></i> Filter Records
+        </button>
+    </form>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Total Revenue</div>
+            <div class="stat-value">Rs <%= dailyTotal.toLocaleString() %></div>
+        </div>
+        <div class="stat-card" style="border-left-color: #6366f1;">
+            <div class="stat-label">Sales Count</div>
+            <div class="stat-value"><%= sales.length %> Orders</div>
+        </div>
+        <div class="stat-card" style="border-left-color: #077610;">
+            <div class="stat-label">Report Period Profit</div>
+            <div class="stat-value">Rs <%= dailyProfit.toLocaleString() %></div>
+        </div>
+    </div>
+
+    <div class="stats-grid" style="
+    padding: 0px 10px; border-radius: 10px;">
+        <div class="one" style="display: flex; justify-content: center; border-radius: 10px;"><div class="block" style="font-weight: bold; color: white;"><p>Bulk is Carton</p></div></div>
+        <div class="two" style="display: flex; justify-content: center; border-radius: 10px;"><div class="black" style="font-weight: bold;"><p>Sub is packet/Bag</p></div></div>
+        <div class="three" style="display: flex; justify-content: center; border-radius: 10px;"><div class="block" style="font-weight: bold;"><p>Unit is Piece</p></div></div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Time/Date</th>
+                    <th>Inventory Sold</th>
+                    <th>Total Bill</th>
+                    <th>Net Profit</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (sales.length === 0) { %>
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 50px; color: #94a3b8;">
+                            <i class="fas fa-folder-open" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
+                            No sales records found for this period.
+                        </td>
+                    </tr>
+                <% } %>
+
+                <% 
+                   let lastDate = ""; 
+                   sales.reverse().forEach(sale => { 
+                       let currentDate = new Date(sale.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                %>
+                    
+                    <% if (currentDate !== lastDate) { %>
+                        <tr>
+                            <td colspan="4" class="date-separator">
+                                <i class="fas fa-calendar-day"></i> <%= currentDate %>
+                                <% if (currentDate === new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })) { %>
+                                    <span style="background: var(--accent); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.6rem; margin-left: 10px;">TODAY</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                        <% lastDate = currentDate; %>
+                    <% } %>
+
+                    <tr>
+                        <td class="time-text">
+                            <%= new Date(sale.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+                        </td>
+                        <td>
+    <% sale.items.forEach(item => { %>
+        <div style="margin-bottom: 5px;">
+            <span class="item-tag">
+                <strong style="color: var(--primary);"><%= item.qty %></strong> 
+                <i class="fas fa-times" style="font-size: 0.6rem; margin: 0 4px; color: #94a3b8;"></i> 
+                <%= item.name %> 
+                <span class="format-badge <%= item.mode === 'bulk' ? 'bg-bulk' : (item.mode === 'sub' ? 'bg-sub' : 'bg-unit') %>">
+                    <%= item.mode %>
+                </span>
+            </span>
+        </div>
+    <% }) %>
+</td>
+                        <td style="font-weight: 700;">Rs <%= sale.totalAmount.toLocaleString() %></td>
+                        <td class="profit-text">+ Rs <%= sale.totalProfit.toLocaleString() %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

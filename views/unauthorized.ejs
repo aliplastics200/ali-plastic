@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Pending | Ali Plastic Store</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; max-width: 450px; border: 1px solid #e2e8f0; }
+        .icon-circle { width: 80px; height: 80px; background: #fffbeb; color: #f59e0b; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 20px; }
+        h2 { color: #1e293b; margin: 0 0 10px; }
+        p { color: #64748b; line-height: 1.6; }
+        .btn-logout { display: inline-block; margin-top: 25px; padding: 10px 20px; background: #f1f5f9; color: #475569; text-decoration: none; border-radius: 8px; font-weight: 600; transition: 0.2s; }
+        .btn-logout:hover { background: #e2e8f0; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon-circle"><i class="fas fa-user-clock"></i></div>
+        <h2>Approval Pending</h2>
+        <p>Hello <strong><%= user.username %></strong>!</p>
+        <p>Your account was created successfully, but an administrator needs to authorize your access before you can see the store records.</p>
+        <p style="font-size: 0.85rem; background: #f1f5f9; padding: 10px; border-radius: 6px;">Please contact <strong>Ali</strong> or the Store Manager to enable your account.</p>
+        <a href="/logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Log Out</a>
+    </div>
+</body>
+</html>

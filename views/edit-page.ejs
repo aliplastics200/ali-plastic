@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ali Plastic Store | Edit Product</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1a73e8; --secondary: #5f6368; --success: #2e7d32;
+            --danger: #d93025; --bg: #f8f9fa;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; }
+        .container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
+        .section { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        label { font-weight: 600; display: block; margin-top: 15px; font-size: 0.85rem; color: #5f6368; }
+        input, select { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid #dadce0; border-radius: 8px; font-size: 1rem; box-sizing: border-box;}
+        
+        /* Stylized Readonly */
+        input[readonly], select[disabled] { background-color: #f1f3f4; cursor: not-allowed; border-style: dashed; color: #70757a; }
+
+        .price-container { background: #fdfdfd; padding: 20px; border-radius: 10px; border: 1px dashed #dadce0; margin-top: 25px; }
+        .price-group-label { font-size: 0.8rem; font-weight: bold; color: var(--primary); text-transform: uppercase; display: block; margin-bottom: 10px; }
+        
+        .summary-box { background: #e8f0fe; padding: 20px; border-radius: 8px; margin-top: 25px; display: flex; justify-content: space-between; border-left: 5px solid var(--primary); }
+        .summary-val { font-weight: bold; font-size: 1.1rem; color: var(--primary); }
+        
+        .btn-update { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 20px; font-size: 1rem; }
+        .hidden { display: none; }
+        .error-msg { color: var(--danger); font-size: 0.8rem; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<%- include('partials/navbar') %>
+
+
+<div class="container">
+    <div class="section">
+        <h2 style="margin-top:0; color:var(--primary)">Edit Product Details</h2>
+        <p style="font-size: 0.85rem; color: var(--secondary);">Note: Format and Ratios are locked to maintain stock integrity.</p>
+
+        <input type="hidden" id="prodId" value="<%= product._id %>">
+
+        <div class="grid-3">
+            <div>
+                <label>Product Name</label>
+                <input type="text" id="prodName" value="<%= product.prodName %>">
+            </div>
+            <div>
+                <label>Format (Locked)</label>
+                <input type="text" id="buyFormat" value="<%= product.buyFormat %>" readonly>
+            </div>
+            <div>
+                <label>Specification (Locked)</label>
+                <input type="text" value="<%= product.unitVal %> <%= product.unitType %>" readonly>
+            </div>
+        </div>
+
+        <div class="grid-3">
+            <div id="subQtyGroup1">
+                <label id="subQtyLabel1">Ratio 1</label>
+                <input type="number" id="subQty1" value="<%= product.subQty1 %>" readonly>
+            </div>
+            <div id="subQtyGroup2">
+                <label id="subQtyLabel2">Ratio 2</label>
+                <input type="number" id="subQty2" value="<%= product.subQty2 %>" readonly>
+            </div>
+            <div>
+                <label>Current Total Stock</label>
+                <input type="text" value="<%= product.totalItems %>" readonly>
+            </div>
+        </div>
+
+        <div class="price-container">
+            <span class="price-group-label">Buying Prices (Cost)</span>
+            <div class="grid-3">
+                <div id="bcG"><label id="bcL">Price/Ctn</label><input type="number" id="buyPriceCarton" oninput="distributePrice('buy', 'carton')"></div>
+                <div id="bpG"><label id="bpL">Price/Pkt</label><input type="number" id="buyPricePacket" oninput="distributePrice('buy', 'packet')"></div>
+                <div><label id="buL">Cost/Unit</label><input type="number" id="buyPricePiece" value="<%= product.unitCost %>" oninput="distributePrice('buy', 'piece')"></div>
+            </div>
+
+            <span class="price-group-label" style="margin-top:20px;">Selling Prices</span>
+            <div class="grid-3">
+                <div id="scG"><label id="scL">Sell/Ctn</label><input type="number" id="sellPriceCarton" oninput="distributePrice('sell', 'carton')"></div>
+                <div id="spG"><label id="spL">Sell/Pkt</label><input type="number" id="sellPricePacket" oninput="distributePrice('sell', 'packet')"></div>
+                <div>
+                    <label id="suL">Sell/Unit</label>
+                    <input type="number" id="sellPricePiece" value="<%= product.sellPrice %>" oninput="distributePrice('sell', 'piece')">
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-box">
+            <div>Product ID: <span style="font-family: monospace;"><%= product._id %></span></div>
+            <div>New Profit: <span class="summary-val" id="profitDisplay">Rs <%= product.profit %></span></div>
+        </div>
+
+        <button class="btn-update" onclick="updateProduct()">Update Product & Save</button>
+        <div style="text-align: center; margin-top: 15px;">
+            <a href="/inventory" style="color: var(--secondary); text-decoration: none; font-size: 0.9rem;">Cancel and Go Back</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const currentFormat = "<%= product.buyFormat %>";
+
+    // Initialize labels on load
+    window.onload = () => {
+        const bpL = document.getElementById('bpL'), spL = document.getElementById('spL');
+        const buL = document.getElementById('buL'), suL = document.getElementById('suL');
+        const g2 = document.getElementById('subQtyGroup2');
+        const bc = document.getElementById('bcG'), sc = document.getElementById('scG');
+
+        if (currentFormat === 'Bag') {
+            document.getElementById('subQtyLabel1').innerText = "Weight per Bag (Kg)";
+            bpL.innerText = "Price per Bag"; spL.innerText = "Sell per Bag";
+            buL.innerText = "Cost per Kg"; suL.innerText = "Sell per Kg";
+            [g2, bc, sc].forEach(el => el.classList.add('hidden'));
+        } else if (currentFormat === 'Packet') {
+            document.getElementById('subQtyLabel1').innerText = "Pieces per Packet";
+            [g2, bc, sc].forEach(el => el.classList.add('hidden'));
+        } else if (currentFormat === 'Single') {
+            document.getElementById('subQtyGroup1').classList.add('hidden');
+            document.getElementById('subQtyGroup2').classList.add('hidden');
+            ['bcG','bpG','scG','spG'].forEach(id => document.getElementById(id).classList.add('hidden'));
+        }
+        
+        // Initial Price Sync
+        distributePrice('buy', 'piece');
+        distributePrice('sell', 'piece');
+    };
+
+    function distributePrice(mode, level) {
+        const q1 = parseFloat(document.getElementById('subQty1').value) || 1;
+        const q2 = parseFloat(document.getElementById('subQty2').value) || 1;
+        const cIn = document.getElementById(`${mode}PriceCarton`);
+        const pIn = document.getElementById(`${mode}PricePacket`);
+        const uIn = document.getElementById(`${mode}PricePiece`);
+
+        if (currentFormat === 'Carton') {
+            if (level === 'carton') { pIn.value = (cIn.value / q1).toFixed(2); uIn.value = (pIn.value / q2).toFixed(2); }
+            else if (level === 'packet') { cIn.value = (pIn.value * q1).toFixed(2); uIn.value = (pIn.value / q2).toFixed(2); }
+            else if (level === 'piece') { pIn.value = (uIn.value * q2).toFixed(2); cIn.value = (pIn.value * q1).toFixed(2); }
+        } else if (currentFormat === 'Packet' || currentFormat === 'Bag') {
+            if (level === 'packet') uIn.value = (pIn.value / q1).toFixed(2);
+            else if (level === 'piece') pIn.value = (uIn.value * q1).toFixed(2);
+        }
+        updateProfit();
+    }
+
+    function updateProfit() {
+        const buy = parseFloat(document.getElementById('buyPricePiece').value) || 0;
+        const sell = parseFloat(document.getElementById('sellPricePiece').value) || 0;
+        const profit = sell - buy;
+        document.getElementById('profitDisplay').innerText = "Rs " + profit.toFixed(2);
+    }
+
+    async function updateProduct() {
+        const id = document.getElementById('prodId').value;
+        const payload = {
+            prodName: document.getElementById('prodName').value,
+            unitCost: document.getElementById('buyPricePiece').value,
+            sellPrice: document.getElementById('sellPricePiece').value,
+            profit: (parseFloat(document.getElementById('sellPricePiece').value) - parseFloat(document.getElementById('buyPricePiece').value)).toFixed(2)
+        };
+
+        try {
+            const res = await fetch(`/inventory/update/${id}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                alert("✅ Product Updated!");
+                window.location.href = '/inventory';
+            }
+        } catch (err) { alert("❌ Update Failed"); }
+    }
+</script>
+</body>
+</html>
