@@ -1,3 +1,13 @@
+<div id="page-loader" class="loader-overlay">
+    <div class="loader-content">
+        <div class="unique-box-loader">
+            <i class="fas fa-box-open"></i>
+            <div class="scan-line"></div>
+        </div>
+        <p class="loader-text">Ali Plastic Store</p>
+    </div>
+</div>
+
 <nav class="navbar">
     <div class="nav-container">
         <a href="/inventory" class="nav-logo">
@@ -67,12 +77,65 @@
 </nav>
 
 <style>
+    /* ADDED LOADER STYLES - Does not affect your existing Navbar CSS */
+    .loader-overlay {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(15, 23, 42, 0.6); /* Transparent dark */
+        backdrop-filter: blur(15px); /* The unique blur background */
+        -webkit-backdrop-filter: blur(15px);
+        display: flex; justify-content: center; align-items: center;
+        z-index: 9999;
+        transition: opacity 0.4s ease;
+    }
+
+    .loader-content { text-align: center; }
+
+    .unique-box-loader {
+        font-size: 3.5rem;
+        color: #3b82f6; /* Matching your --accent */
+        position: relative;
+        display: inline-block;
+        animation: box-float 2s infinite ease-in-out;
+    }
+
+    .scan-line {
+        position: absolute;
+        width: 100%; height: 3px;
+        background: #fff;
+        box-shadow: 0 0 15px #fff;
+        top: 0;
+        animation: scanning 2s infinite linear;
+    }
+
+    .loader-text {
+        color: white;
+        margin-top: 15px;
+        font-weight: 800;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        opacity: 0.8;
+    }
+
+    @keyframes scanning {
+        0%, 100% { top: 0%; opacity: 0; }
+        50% { top: 100%; opacity: 1; }
+    }
+
+    @keyframes box-float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .loader-hidden { opacity: 0; pointer-events: none; }
+
+    /* YOUR ORIGINAL STYLES START HERE (UNTOUCHED) */
     :root {
         --nav-bg: #1e293b; 
         --accent: #3b82f6;
         --glass-border: rgba(255, 255, 255, 0.1);
     }
-
     .navbar {
         background: var(--nav-bg);
         color: white;
@@ -82,8 +145,6 @@
         z-index: 2000;
         border-bottom: 1px solid var(--glass-border);
     }
-
-    /* CENTERING LOGIC: This removes side space and groups everything in middle */
     .nav-container {
         display: flex;
         justify-content: center; 
@@ -91,7 +152,6 @@
         gap: 50px;
         width: 100%;
     }
-
     .nav-logo {
         display: flex;
         align-items: center;
@@ -113,14 +173,11 @@
     }
     .brand-name { display: block; font-weight: 800; font-size: 1.1rem; line-height: 1; }
     .brand-sub { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
-
     .nav-content { display: flex; align-items: center; gap: 40px; }
     .nav-links { display: flex; list-style: none; gap: 35px; margin: 0; padding: 0; }
-    
     .nav-group { display: flex; flex-direction: column; }
     .group-label { font-size: 0.6rem; color: #64748b; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px;}
     .group-items { display: flex; gap: 20px; }
-
     .nav-link {
         color: #cbd5e1;
         text-decoration: none;
@@ -133,7 +190,6 @@
     }
     .nav-link:hover { color: white; }
     .admin-special { color: #fcd34d; }
-
     .nav-user-profile {
         display: flex;
         align-items: center;
@@ -156,13 +212,10 @@
     .user-details { display: flex; flex-direction: column; line-height: 1.2; }
     .u-name { font-size: 0.8rem; font-weight: 700; color: #f8fafc; }
     .logout-btn { font-size: 0.7rem; color: #f87171; text-decoration: none; font-weight: 600; }
-
     .auth-pending { color: #f59e0b; font-size: 0.85rem; font-weight: 600; background: rgba(245, 158, 11, 0.1); padding: 5px 12px; border-radius: 4px; }
     .btn-signup { background: var(--accent); padding: 6px 14px; border-radius: 6px; color: white !important; }
-
     .nav-toggle { display: none; background: none; border: none; color: white; font-size: 1.3rem; cursor: pointer; }
 
-    /* Mobile Responsive */
     @media (max-width: 1100px) {
         .nav-container { justify-content: space-between; padding: 0 10px; gap: 0; }
         .nav-logo { border: none; }
@@ -183,6 +236,15 @@
 </style>
 
 <script>
+    // LOADER LOGIC
+    window.addEventListener('load', function() {
+        const loader = document.getElementById('page-loader');
+        setTimeout(() => {
+            loader.classList.add('loader-hidden');
+        }, 600); // 600ms delay for smooth finish
+    });
+
+    // YOUR ORIGINAL TOGGLE LOGIC
     document.getElementById('navToggle').addEventListener('click', function() {
         document.getElementById('navMenu').classList.toggle('show');
     });
