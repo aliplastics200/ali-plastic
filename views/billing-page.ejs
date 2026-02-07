@@ -187,10 +187,10 @@
         </div>
 
         <div class="cart-footer">
-            <div class="summary-line" style="color: var(--success); font-weight: 700;">
+            <!-- <div class="summary-line" style="color: var(--success); font-weight: 700;">
                 <span>Total Profit</span>
                 <span id="totalProfitDisplay">Rs 0.00</span>
-            </div>
+            </div> -->
             <div class="summary-line summary-total">
                 <span>Grand Total</span>
                 <span id="grandTotal">Rs 0.00</span>
@@ -291,7 +291,7 @@
                         <div>
                             <div style="font-weight:800; font-size:0.95rem;">${item.name}</div>
                             <div style="font-size:0.75rem; color:var(--text-sub); font-weight:600;">
-                                Mode: ${item.formatName} | Cost: Rs ${item.costPrice}
+                                Format/Mode: ${item.formatName} 
                             </div>
                         </div>
                         <button onclick="removeItem(${idx})" style="background:none; border:none; color:#cbd5e1; cursor:pointer;"><i class="fas fa-times-circle"></i></button>
