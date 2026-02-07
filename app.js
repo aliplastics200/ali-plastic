@@ -9,9 +9,11 @@ require('dotenv').config();
 
 var app = express();
 
-app.set('trust proxy', 1); // ✅ REQUIRED FOR HEROKU
+app.set('trust proxy', 1); 
 
-mongoose.connect(process.env.MONGODB_URI)
+// Fallback for MONGODB_URI to prevent startup crash
+const dbURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/inventoryDB';
+mongoose.connect(dbURI)
   .then(() => console.log('✅ MongoDB Connected'))
   .catch(err => console.error('❌ MongoDB Error:', err));
 
@@ -25,13 +27,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(session({
   name: 'ali-plastic-pos',
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.SESSION_SECRET || 'ali_plastic_secret_secure_123', // Added Fallback
   resave: false,
   saveUninitialized: false,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    sameSite: 'lax'
+    sameSite: 'lax',
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
 
@@ -60,3 +63,5 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on ${PORT}`));
+
+module.exports = app;
