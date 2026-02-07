@@ -299,11 +299,16 @@
 
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div style="display:flex; align-items:center; background:#f1f5f9; border-radius:8px; padding:2px;">
-                            <button class="btn-add" style="border:none; padding:5px 10px;" onclick="changeQty(${idx}, -1)">-</button>
-                            <span style="padding:0 12px; font-weight:800;">${item.qty}</span>
-                            
-                            <button class="btn-add" style="border:none; padding:5px 10px;" onclick="changeQty(${idx}, 1)">+</button>
-                        </div>
+    <button class="btn-add" style="border:none; padding:5px 10px;" onclick="changeQty(${idx}, -1)">-</button>
+    
+    <input type="number" 
+           value="${item.qty}" 
+           min="1"
+           style="width: 50px; border: none; background: transparent; text-align: center; font-weight: 800; font-family: inherit; font-size: 0.9rem; outline: none;"
+           onchange="manualQty(${idx}, this.value)">
+    
+    <button class="btn-add" style="border:none; padding:5px 10px;" onclick="changeQty(${idx}, 1)">+</button>
+</div>
                         <div style="display:flex; align-items:center; gap:5px;">
                             <span style="font-size:0.8rem; font-weight:800;">Rs</span>
                             <input type="number" 
@@ -333,6 +338,33 @@
         if (item.qty <= 0) basket.splice(idx, 1);
         render();
     }
+    function manualQty(idx, val) {
+    const newVal = parseInt(val);
+    const item = basket[idx];
+    const mult = getMult(item.id, item.mode);
+    const p = dbItems[item.id];
+
+    // 1. Prevent non-numbers or values less than 1
+    if (isNaN(newVal) || newVal < 1) {
+        item.qty = 1;
+        render();
+        return;
+    }
+
+    // 2. Stock Check
+    let usedOther = basket.reduce((sum, i, iIdx) => 
+        iIdx !== idx && i.id === item.id ? sum + (getMult(i.id, i.mode) * i.qty) : sum, 0);
+    
+    if ((usedOther + (newVal * mult)) > p.totalItems) {
+        alert("Stock Limit Reached!");
+        render(); // Resets input to previous valid qty
+        return;
+    }
+
+    // 3. Update and Refresh
+    item.qty = newVal;
+    render();
+}
     function removeItem(idx) { basket.splice(idx, 1); render(); }
     async function submitSale() {
         const items = basket.map(i => ({ id: i.id, qty: i.qty, mode: i.mode, price: i.negotiatedPrice }));
