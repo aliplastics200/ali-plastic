@@ -7,11 +7,13 @@ const session = require('express-session');
 const flash = require('connect-flash');
 require('dotenv').config();
 
-var app = express(); 
+var app = express();
 
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/inventoryDB')
+app.set('trust proxy', 1); // ✅ REQUIRED FOR HEROKU
+
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('✅ MongoDB Connected'))
-  .catch(err => console.error('❌ Connection Error:', err));
+  .catch(err => console.error('❌ MongoDB Error:', err));
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -22,9 +24,15 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'ali_plastic_secret',
+  name: 'ali-plastic-pos',
+  secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: 'lax'
+  }
 }));
 
 app.use(flash());
@@ -40,26 +48,15 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use((req, res, next) => {
-  res.locals.user = req.user || null;
-  next();
-});
-
 app.use('/', require('./routes/auth'));
 app.use('/inventory', require('./routes/inventory'));
 
-app.get('/', (req, res) => {
-    res.redirect('/login');
-});
+app.get('/', (req, res) => res.redirect('/login'));
 
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Something broke!');
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
-
-module.exports = app;
+app.listen(PORT, () => console.log(`🚀 Server running on ${PORT}`));
