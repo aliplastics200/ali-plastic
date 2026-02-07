@@ -15,13 +15,6 @@
 
     body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding-bottom: 50px; }
     
-    /* Navbar */
-    nav { background: var(--card); padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; flex-wrap: wrap; gap: 10px; }
-    .nav-brand { font-weight: 700; font-size: 1.25rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 10px; }
-    .nav-links { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 5px; width: 100%; justify-content: flex-start; }
-    .nav-links a { text-decoration: none; color: var(--secondary); font-weight: 500; font-size: 0.85rem; white-space: nowrap; }
-    .nav-links a.active { color: var(--primary); }
-
     .container { max-width: 1200px; margin: 1rem auto; padding: 0 1rem; }
 
     /* Stats Cards */
@@ -33,10 +26,11 @@
 
     /* Search Bar */
     .search-box { position: relative; margin-bottom: 1.5rem; }
-    .search-box input { width: 100%; padding: 12px 45px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 1rem; box-sizing: border-box; }
+    .search-box input { width: 100%; padding: 12px 45px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 1rem; box-sizing: border-box; outline: none; transition: 0.3s; }
+    .search-box input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
     .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--secondary); }
 
-    /* Table & Card Switching */
+    /* Table & Badges */
     .table-container { background: var(--card); border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
     table { width: 100%; border-collapse: collapse; }
     th { background: #f8fafc; padding: 1rem; text-align: left; font-size: 0.75rem; color: var(--secondary); text-transform: uppercase; border-bottom: 1px solid #e2e8f0; }
@@ -48,43 +42,30 @@
     .low-stock { background: #fee2e2; color: #991b1b; }
 
     .action-btns { display: flex; gap: 20px; font-size: 1.1rem; }
-    .btn-edit { color: var(--primary); }
-    .btn-delete { color: var(--danger); }
+    .btn-edit { color: var(--primary); cursor: pointer; }
+    .btn-delete { color: var(--danger); cursor: pointer; }
+
+    /* Empty States */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--secondary);
+    }
+    .empty-state i { font-size: 3.5rem; color: #e2e8f0; margin-bottom: 15px; display: block; }
+    .empty-state h2 { color: var(--text); margin: 0; font-size: 1.25rem; }
 
     /* RESPONSIVE BREAKPOINT */
     @media (max-width: 768px) {
-        nav { padding: 1rem; }
-        .nav-links { order: 3; margin-top: 10px; }
-        
-        /* Hide table headers on mobile */
         thead { display: none; }
-        
-        /* Convert table rows to cards */
-        tr { 
-            display: block; 
-            border-bottom: 8px solid #f1f5f9; 
-            padding: 15px; 
-            position: relative;
-        }
-        
-        td { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 8px 0; 
-            border: none;
-        }
-
-        /* Set specific layout for name and actions in card mode */
+        tr { display: block; border-bottom: 8px solid #f1f5f9; padding: 15px; position: relative; }
+        td { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border: none; }
         td:first-child { display: block; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
         td:last-child { margin-top: 10px; padding-top: 10px; border-top: 1px solid #f1f5f9; }
-
-        /* Add labels before data on mobile */
-        td:nth-of-type(2):before { content: "Format"; font-weight: 600; color: var(--secondary); font-size: 0.8rem; }
-        td:nth-of-type(3):before { content: "Stock"; font-weight: 600; color: var(--secondary); font-size: 0.8rem; }
-        td:nth-of-type(4):before { content: "Cost"; font-weight: 600; color: var(--secondary); font-size: 0.8rem; }
-        td:nth-of-type(5):before { content: "Sell"; font-weight: 600; color: var(--secondary); font-size: 0.8rem; }
-        td:nth-of-type(6):before { content: "Profit"; font-weight: 600; color: var(--secondary); font-size: 0.8rem; }
+        td:nth-of-type(2):before { content: "Format"; font-weight: 600; color: var(--secondary); }
+        td:nth-of-type(3):before { content: "Stock"; font-weight: 600; color: var(--secondary); }
+        td:nth-of-type(4):before { content: "Cost"; font-weight: 600; color: var(--secondary); }
+        td:nth-of-type(5):before { content: "Sell"; font-weight: 600; color: var(--secondary); }
+        td:nth-of-type(6):before { content: "Profit"; font-weight: 600; color: var(--secondary); }
     }
 </style>
 </head>
@@ -112,81 +93,110 @@
 
     <div class="search-box">
         <i class="fas fa-search"></i>
-        <input type="text" id="searchInput" placeholder="Search product..." onkeyup="filterTable()">
+        <input type="text" id="searchInput" placeholder="Search product name..." onkeyup="filterTable()">
     </div>
 
     <div class="table-container">
-        <table id="productTable">
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Format</th>
-                    <th>Stock</th>
-                    <th>Cost</th>
-                    <th>Sell</th>
-                    <th>Profit</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% products.forEach(p => { %>
-                <tr>
-                    <td>
-                        <div style="font-weight: 700;"><%= p.prodName %></div>
-                        <div style="font-size: 0.75rem; color: var(--secondary);"><%= p.unitVal %> <%= p.unitType %></div>
-                    </td>
-                    <td><%= p.buyFormat %></td>
-                    <td>
-                        <span class="badge stock-badge <%= p.totalItems < 10 ? 'low-stock' : '' %>">
-                            <%= p.totalItems %> <%= p.buyFormat === 'Bag' ? 'Kg' : 'Pcs' %>
-                        </span>
-                    </td>
-                    <td>Rs <%= p.unitCost %></td>
-                    <td>Rs <%= p.sellPrice %></td>
-                    <td><span class="badge profit-badge">Rs <%= p.profit %></span></td>
-                    <td>
-                        <div class="action-btns">
-                            <a href="/inventory/edit/<%= p._id %>" class="btn-edit"><i class="fas fa-edit"></i></a>
-                            <a onclick="deleteProduct('<%= p._id %>', '<%= p.prodName %>')" class="btn-delete"><i class="fas fa-trash"></i></a>
-                        </div>
-                    </td>
-                </tr>
-                <% }) %>
-            </tbody>
-        </table>
+        <% if (products.length > 0) { %>
+            <table id="productTable">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Format</th>
+                        <th>Stock</th>
+                        <th>Cost</th>
+                        <th>Sell</th>
+                        <th>Profit</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% products.forEach(p => { %>
+                    <tr>
+                        <td>
+                            <div style="font-weight: 700;"><%= p.prodName %></div>
+                            <div style="font-size: 0.75rem; color: var(--secondary);"><%= p.unitVal %> <%= p.unitType %></div>
+                        </td>
+                        <td><%= p.buyFormat %></td>
+                        <td>
+                            <span class="badge stock-badge <%= p.totalItems < 10 ? 'low-stock' : '' %>">
+                                <%= p.totalItems %> <%= p.buyFormat === 'Bag' ? 'Kg' : 'Pcs' %>
+                            </span>
+                        </td>
+                        <td>Rs <%= p.unitCost %></td>
+                        <td>Rs <%= p.sellPrice %></td>
+                        <td><span class="badge profit-badge">Rs <%= p.profit %></span></td>
+                        <td>
+                            <div class="action-btns">
+                                <a href="/inventory/edit/<%= p._id %>" class="btn-edit"><i class="fas fa-edit"></i></a>
+                                <a onclick="deleteProduct('<%= p._id %>', '<%= p.prodName %>')" class="btn-delete"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+
+            <div id="noResults" class="empty-state" style="display: none;">
+                <i class="fas fa-box-open"></i>
+                <h2>No matches found</h2>
+                <p>Try adjusting your search terms.</p>
+            </div>
+
+        <% } else { %>
+            <div class="empty-state">
+                <i class="fas fa-layer-group"></i>
+                <h2>Inventory is empty</h2>
+                <p>Start by adding your first product to the system.</p>
+                <a href="/inventory/add-page" style="display:inline-block; margin-top:15px; background:var(--primary); color:white; padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:600;">+ Add Product</a>
+            </div>
+        <% } %>
     </div>
 </div>
 
 <script>
-    // Search Filter Logic
+    // Improved Search Filter Logic
     function filterTable() {
         const input = document.getElementById("searchInput");
         const filter = input.value.toUpperCase();
         const table = document.getElementById("productTable");
+        if (!table) return;
+
         const tr = table.getElementsByTagName("tr");
+        const noResults = document.getElementById("noResults");
+        const thead = table.getElementsByTagName("thead")[0];
+        let visibleCount = 0;
 
         for (let i = 1; i < tr.length; i++) {
             const tdName = tr[i].getElementsByTagName("td")[0];
             if (tdName) {
                 const txtValue = tdName.textContent || tdName.innerText;
-                tr[i].style.display = txtValue.toUpperCase().indexOf(filter) > -1 ? "" : "none";
+                const matches = txtValue.toUpperCase().indexOf(filter) > -1;
+                tr[i].style.display = matches ? "" : "none";
+                if(matches) visibleCount++;
             }
+        }
+
+        // Toggle empty state and headers
+        if (noResults) {
+            noResults.style.display = visibleCount === 0 ? "block" : "none";
+            if (thead) thead.style.display = visibleCount === 0 ? "none" : "";
         }
     }
 
     // Delete Logic
     async function deleteProduct(id, name) {
-        if (confirm(`⚠️ Are you sure you want to delete "${name}"?\nThis action cannot be undone.`)) {
+        if (confirm(`⚠️ Delete "${name}"?\nThis cannot be undone.`)) {
             try {
                 const res = await fetch(`/inventory/delete/${id}`, { method: 'DELETE' });
                 if (res.ok) {
                     window.location.reload();
                 } else {
-                    alert("Failed to delete product.");
+                    alert("Failed to delete.");
                 }
             } catch (err) {
                 console.error(err);
-                alert("Server error occurred.");
+                alert("Error connecting to server.");
             }
         }
     }
