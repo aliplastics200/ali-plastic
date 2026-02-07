@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node app.js"
+  },"engines": {
+    "node": "18.x"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
