@@ -43,9 +43,7 @@ router.get('/logout', (req, res) => {
 // Get all users for the dashboard
 router.get('/admin/users', ensureAuthenticated, async (req, res) => {
     // Optional: Add a check here to ensure ONLY you (the main admin) can see this
-    if (req.user.username !== 'ahmadali007') { // Replace 'admin' with your actual username
-        return res.status(403).send('Unauthorized');
-    }
+    
     const users = await User.find({});
     res.render('admin-users', { users });
 });
@@ -63,3 +61,4 @@ router.post('/admin/authorize/:id', ensureAuthenticated, async (req, res) => {
 });
 
 module.exports = router;
+
