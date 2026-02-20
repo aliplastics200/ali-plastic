@@ -187,10 +187,10 @@
         </div>
 
         <div class="cart-footer">
-            <!-- <div class="summary-line" style="color: var(--success); font-weight: 700;">
+            <div class="summary-line" style="color: var(--success); font-weight: 700; display: none;">
                 <span>Total Profit</span>
                 <span id="totalProfitDisplay">Rs 0.00</span>
-            </div> -->
+            </div>
             <div class="summary-line summary-total">
                 <span>Grand Total</span>
                 <span id="grandTotal">Rs 0.00</span>
@@ -321,6 +321,15 @@
         });
 
         document.getElementById('grandTotal').innerText = `Rs ${total.toFixed(2)}`;
+        const profitDisplay = document.getElementById('totalProfitDisplay');
+    if (profitDisplay) {
+        profitDisplay.innerText = `Rs ${totalProfit.toFixed(2)}`;
+    }
+
+    document.getElementById('itemCount').innerText = `${basket.length} items`;
+    
+    // This line will finally run now!
+    document.getElementById('finishBtn').disabled = isInvalid || basket.length === 0;
         document.getElementById('totalProfitDisplay').innerText = `Rs ${totalProfit.toFixed(2)}`;
         document.getElementById('itemCount').innerText = `${basket.length} items`;
         document.getElementById('finishBtn').disabled = isInvalid || basket.length === 0;
